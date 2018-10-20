@@ -4,6 +4,9 @@ USE CS144;
 -- drop existing tables
 DROP TABLE IF EXISTS Posts;
 
+-- drop existing tables
+DROP TABLE IF EXISTS MaxIDs;
+
 -- create table Posts
 CREATE TABLE Posts(
   username	VARCHAR(40),
@@ -13,4 +16,11 @@ CREATE TABLE Posts(
   modified	TIMESTAMP DEFAULT '2000-01-01 00:00:00',
   created	TIMESTAMP DEFAULT '2000-01-01 00:00:00',
   PRIMARY KEY(username, postid)
+);
+
+-- create table MaxIDs
+CREATE TABLE MaxIDs(
+  username	VARCHAR(40),
+  maxid	INTEGER,
+  PRIMARY KEY(username)
 );
