@@ -101,7 +101,8 @@ public class Editor extends HttpServlet {
                                 /* debug */
                                 System.out.println("Debug: " + rs.getString("title") + " " + rs.getString("body"));
                             } else {
-                                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                                request.setAttribute("title", "");
+                                request.setAttribute("body", "");
                             }
                         } else {
                             /* user not in database */
@@ -141,6 +142,19 @@ public class Editor extends HttpServlet {
                 }
                 request.getRequestDispatcher("/list.jsp").forward(request, response);
             } else if(action.equals("preview")) {
+                if(username == null || postid == null || title == null || body == null) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                } else {
+                    Parser parser = Parser.builder().build();
+                    Node d_title = parser.parse(title);
+                    Node d_body = parser.parse(body);
+                    HtmlRenderer renderer_t = HtmlRenderer.builder().build();
+                    HtmlRenderer renderer_b = HtmlRenderer.builder().build();
+                    request.setAttribute("title_html", renderer_t.render(d_title));
+                    request.setAttribute("body_html", renderer_b.render(d_body));
+                    System.out.println("Debug: render html" + renderer_b.render(d_body) + " End");
+                }
+                request.getRequestDispatcher("/preview.jsp").forward(request, response);
 
             } else {
                 /* unknown action using doGet */
@@ -216,6 +230,7 @@ public class Editor extends HttpServlet {
                             s.setString(1, username);
                             s.setInt(2, 1);
                             s.executeUpdate();
+                            id = 1;
                         } else {
                             s = c.prepareStatement("UPDATE MaxIDs SET maxid = ? WHERE username = ?");
                             s.setString(2, username);
