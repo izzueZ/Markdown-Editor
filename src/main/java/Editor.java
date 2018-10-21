@@ -236,6 +236,7 @@ public class Editor extends HttpServlet {
                             s.setString(2, username);
                             s.setInt(1, id+1);
                             s.executeUpdate();
+                            id += 1;
                         }
 
                         s = c.prepareStatement("INSERT INTO Posts VALUES (?, ?, ?, ?, ?, ?)");
