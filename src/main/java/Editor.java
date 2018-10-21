@@ -61,6 +61,7 @@ public class Editor extends HttpServlet {
         String postid = request.getParameter("postid");
         String title = request.getParameter("title");
         String body = request.getParameter("body");
+        boolean not_found = false;
 
         Connection c = null;
         PreparedStatement s = null;
@@ -82,6 +83,7 @@ public class Editor extends HttpServlet {
                         request.setAttribute("title", title);
                         request.setAttribute("body", body);
                     } else {
+                        int parsed_id = Integer.parseInt(postid);
                         s = c.prepareStatement("SELECT * FROM MaxIDs WHERE username = ?");
                         s.setString(1, username);
                         rs = s.executeQuery();
@@ -90,7 +92,7 @@ public class Editor extends HttpServlet {
                             /* user already in database */
                             s = c.prepareStatement("SELECT * FROM Posts WHERE username = ? AND postid = ?");
                             s.setString(1, username);
-                            s.setInt(2, Integer.parseInt(postid));
+                            s.setInt(2, parsed_id);
                             rs = s.executeQuery();
 
                             if(rs.next()) {
@@ -101,8 +103,12 @@ public class Editor extends HttpServlet {
                                 /* debug */
                                 System.out.println("Debug: " + rs.getString("title") + " " + rs.getString("body"));
                             } else {
-                                request.setAttribute("title", "");
-                                request.setAttribute("body", "");
+                                if(parsed_id <= 0) {
+                                    request.setAttribute("title", "");
+                                    request.setAttribute("body", "");
+                                } else {
+                                    not_found = true;
+                                }
                             }
                         } else {
                             /* user not in database */
@@ -111,7 +117,12 @@ public class Editor extends HttpServlet {
                         }
                     }
                 }
-                request.getRequestDispatcher("/edit.jsp").forward(request, response);
+                if(not_found) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                }
+                else {
+                    request.getRequestDispatcher("/edit.jsp").forward(request, response);
+                }
             } else if(action.equals("list")) {
                 if(username == null) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
